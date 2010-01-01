@@ -42,7 +42,7 @@ class Distrib
     private $hashring = array();
     private $hashring_count = 0;
     
-    private $replicas = 2048;
+    private $replicas = 0;
     private $slices_count = 0;
     private $slices_div = 0;
     
@@ -60,18 +60,18 @@ class Distrib
      * 
      * @param  string  The name of the algorithm to use.
      * @param  array   An array of backends and their respective weights.
-     * @param  int     The total number of replicas to create. Default: 2048.
-     * @param  int     The maximum number of cached entries. Default: 0.
+     * @param  int     The number of replicas per backend. Default: 256.
+     * @param  int     The number of cache slots. Default: 256.
      */
     
-    public function __construct($algorithm, $backends, $replicas = 2048, $cache_max = 0)
+    public function __construct($algorithm, $backends, $replicas = 256, $cache_max = 256)
     {
         // Keep the data.
         
         $this->algorithm = $algorithm;
         $this->backends = $backends;
         $this->backends_count = count($backends);
-        $this->replicas = $replicas;
+        $this->replicas = ($replicas ? $replicas : 256) * $this->backends_count;
         $this->cache_max = $cache_max;
         
         // Some sanity checks.
