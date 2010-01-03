@@ -1,11 +1,14 @@
 <?php
 
 /**
- * DISTRIB : A Consistent Hashing Library.
+ * DISTRIB : Consistent Hashing Library for PHP 5
  * 
  * This class can be used by client libraries for key-value stores to distribute
  * keys across multiple backends. Several algorithms are supported, from very
  * simple naive hashing to redundant consistent hashing.
+ * 
+ * URL: http://github.com/kijin/distrib
+ * Version: 0.1
  * 
  * Copyright (c) 2010, Kijin Sung <kijinbear@gmail.com>
  * 
