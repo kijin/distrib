@@ -1,0 +1,47 @@
+
+DISTRIB : Consistent Hashing Library for PHP 5
+==============================================
+
+This class can be used by client libraries for key-value stores to distribute
+keys across multiple backends. Several algorithms are supported, from very
+simple naive hashing to redundant consistent hashing.
+
+Distrib uses 256 replicas per backend by default, unless configured otherwise.
+The hash ring is divided into smaller slices, and only a small number of slices
+are scanned in each mapping. This makes Distrib much faster than implementations
+which scan the entire hashring, and sometimes even faster than binary tree
+search algorithms (depending on the number of backends and replicas).
+
+
+How to Use:
+    
+    // Load the Distrib class.
+    
+    include('distrib.php');
+    
+    // Supported algorithms: naive, consistent, redundant.
+    
+    $algorithm = 'consistent';
+    
+    // Backends syntax is $server => $weight.
+    
+    $backends = array(
+        '192.168.0.1' => 10,
+        '192.168.0.2' => 20,
+        '192.168.0.3' => 30,
+    );
+    
+    // Initialize the Distrib class.
+    
+    $distrib = new Distrib($algorithm, $backends);
+    
+    // Do this for each key. You'll get an *array* of matching backends.
+    
+    $servers = $distrib->map($key);
+    
+    // When using the redundant algorithm, you can ask for several backends.
+    
+    $servers = $distrib->map($key, 2);
+
+
+License: MIT License.
