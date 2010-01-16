@@ -8,7 +8,7 @@
  * simple naive hashing to redundant consistent hashing.
  * 
  * URL: http://github.com/kijin/distrib
- * Version: 0.1
+ * Version: 0.1.1
  * 
  * Copyright (c) 2010, Kijin Sung <kijinbear@gmail.com>
  * 
@@ -74,8 +74,15 @@ class Distrib
         $this->algorithm = $algorithm;
         $this->backends = $backends;
         $this->backends_count = count($backends);
-        $this->replicas = ($replicas ? $replicas : 256) * $this->backends_count;
+        $this->replicas = $replicas;
         $this->cache_max = $cache_max;
+        
+        // Make sure that $this->replicas is a multiple of 8.
+        
+        if (($this->replicas % 8) !== 0)
+        {
+            $this->replicas = round($this->replicas / 8) * 8;
+        }
         
         // Some sanity checks.
         
@@ -98,7 +105,7 @@ class Distrib
             $this->hashring = array();
             $this->hashring_count = 0;
             
-            // Iterate the backends.
+            // Iterate over the backends.
             
             foreach ($this->backends as $backend => $weight)
             {
@@ -121,7 +128,7 @@ class Distrib
         {
             // How many slices do we want?
             
-            $this->slices_count = $this->replicas / 8;
+            $this->slices_count = ($this->replicas * $this->backends_count) / 8;
             $this->slices_half = $this->slices_count / 2;
             $this->slices_div = (2147483648 / $this->slices_half);
             
@@ -129,17 +136,17 @@ class Distrib
             
             $this->hashring = array_fill(0, $this->slices_count, array());
             
-            // Calculate a multiplier, for a total of a fixed number of replicas.
+            // Calculate the average weight.
             
-            $multiplier = $this->replicas / array_sum($this->backends);
+            $avg = round(array_sum($this->backends) / $this->backends_count, 2);
             
-            // Interate the backends.
+            // Interate over the backends.
             
             foreach ($this->backends as $backend => $weight)
             {
-                // Adjust the weight with the multiplier.
+                // Adjust the weight.
                 
-                $weight = round($weight * $multiplier);
+                $weight = round(($weight / $avg) * $this->replicas);
                 
                 // Create as many replicas as $weight.
                 
@@ -234,7 +241,7 @@ class Distrib
                 
                 while (true)
                 {
-                    // Interate over one slice at a time.
+                    // Go through the hashring, one slice at a time.
                     
                     foreach ($this->hashring[$slice] as $position => $backend)
                     {
