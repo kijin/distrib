@@ -8,7 +8,7 @@
  * simple naive hashing to redundant consistent hashing.
  * 
  * URL: http://github.com/kijin/distrib
- * Version: 0.1.1
+ * Version: 0.1.2
  * 
  * Copyright (c) 2010, Kijin Sung <kijinbear@gmail.com>
  * 
