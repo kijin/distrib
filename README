@@ -35,11 +35,11 @@ How to Use:
     
     $distrib = new Distrib($algorithm, $backends);
     
-    // Do this for each key. You'll get an *array* of matching backends.
+    // Do this for each key.
     
     $servers = $distrib->map($key);
     
-    // When using the redundant algorithm, you can ask for several backends.
+    // When using the redundant algorithm, you'll get an array of backends.
     
     $servers = $distrib->map($key, 2);
 

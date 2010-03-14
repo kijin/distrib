@@ -77,6 +77,15 @@ class Distrib
         $this->replicas = $replicas;
         $this->cache_max = $cache_max;
         
+        // If there's only one backend, short-circuit and return.
+        
+        if ($this->backends_count === 1)
+        {
+            $backends = array_keys($backends);
+            $this->backends = $backends[0];
+            return;
+        }
+        
         // Make sure that $this->replicas is a multiple of 8.
         
         if (($this->replicas % 8) !== 0)
@@ -178,14 +187,15 @@ class Distrib
      * 
      * @param   string  The key to map.
      * @param   int     The number of backends to return. [optional: only with redundant consistent hashing]
-     * @return  array   An array of backend IDs.
+     * @return  string  The backend ID that matches the key.
+     * @return  array   An array of backend IDs that match the key, if using the redundant algorithm.
      */
     
     public function map($key, $count = 1)
     {
         // If we have only one backend, return it.
         
-        if ($this->backends_count == 1) return array_keys($this->backends);
+        if ($this->backends_count === 1) return $this->backends;
         
         // If the key has already been mapped, return the cached entry.
         
@@ -197,7 +207,7 @@ class Distrib
         
         // Initialize the return array.
         
-        $return = array();
+        $return = false;
         
         // Do the mapping.
         
@@ -210,16 +220,16 @@ class Distrib
                 // Very basic CRC32 + modulus.
                 
                 $position = abs(crc32($key)) % $this->hashring_count;
-                $return = array($this->hashring[$position]);
+                $return = $this->hashring[$position];
                 break;
             
             // Single consistent hashing.
             
             case 'consistent':
                 
-                // Just use the redundant algorithm, with $count = 1.
+                // Just use the redundant algorithm, with $count = 0.
                 
-                $count = 1;
+                $count = 0;
                 
             // Redundant consistent hashing.
                 
@@ -249,9 +259,17 @@ class Distrib
                         
                         if ($position >= $crc32)
                         {
-                            // If $count = 1, no more checks are necessary.
+                            // If $count = 0, return the backend.
                             
-                            if ($count === 1)
+                            if ($count === 0)
+                            {
+                                $return = $backend;
+                                break 3;
+                            }
+                            
+                            // If $count = 1, return the backend as an array.
+                            
+                            elseif ($count === 1)
                             {
                                 $return = array($backend);
                                 break 3;
@@ -286,10 +304,7 @@ class Distrib
                         $looped = true;
                     }
                 }
-            
-            // If we're here, something is wrong.
-            
-            default: $return = array();
+                
         }
         
         // Cache the result for quick retrieval in the future.
