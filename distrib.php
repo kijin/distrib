@@ -8,7 +8,7 @@
  * simple naive hashing to redundant consistent hashing.
  * 
  * URL: http://github.com/kijin/distrib
- * Version: 0.1.2
+ * Version: 0.1.3
  * 
  * Copyright (c) 2010, Kijin Sung <kijinbear@gmail.com>
  * 
@@ -207,7 +207,7 @@ class Distrib
         
         // Initialize the return array.
         
-        $return = false;
+        $return = array();
         
         // Do the mapping.
         
@@ -220,8 +220,7 @@ class Distrib
                 // Very basic CRC32 + modulus.
                 
                 $position = abs(crc32($key)) % $this->hashring_count;
-                $return = $this->hashring[$position];
-                break;
+                return $this->hashring[$position];
             
             // Single consistent hashing.
             
